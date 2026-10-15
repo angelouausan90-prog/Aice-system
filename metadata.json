@@ -1,0 +1,6 @@
+{
+  "name": "Aice Franchise Management and Recruitment System",
+  "description": "Centralized internal business operations portal for Aice franchise management, agent recruitment verification, work reporting, and inventory tracking.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -200,6 +200,19 @@ export const FranchiseLocationMap: React.FC<FranchiseLocationMapProps> = ({
     }
   }, [filteredOutlets, showBuffers, selectedOutlet, selectedFranchiseeId]);
 
+  // Auto-focus on selected franchisee when ID is provided via navigation
+  useEffect(() => {
+    if (selectedFranchiseeId && franchisees.length > 0) {
+      const match = franchisees.find(f => f.id === selectedFranchiseeId);
+      if (match && match.latitude && match.longitude) {
+        setSelectedOutlet(match);
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.flyTo([match.latitude, match.longitude], 15, { duration: 1.2 });
+        }
+      }
+    }
+  }, [selectedFranchiseeId, franchisees]);
+
   // Handle region jump buttons
   const handleRegionChange = (region: 'ALL' | 'NCR' | 'CEBU' | 'DAVAO') => {
     setActiveRegion(region);

@@ -204,14 +204,29 @@ export default function App() {
     }
   };
 
-  const handleLoginSuccess = (user: User, agentProfile?: AgentProfile, franchiseProfile?: FranchiseeProfile) => {
+  const handleLoginSuccess = (
+    user: User, 
+    agentProfile?: AgentProfile, 
+    franchiseProfile?: FranchiseeProfile,
+    targetTab?: string,
+    mapFranchiseeId?: string
+  ) => {
     setCurrentUser(user);
     if (agentProfile) setCurrentAgentProfile(agentProfile);
     if (franchiseProfile) setCurrentFranchiseProfile(franchiseProfile);
 
-    if (user.role === 'Admin') setActiveTab('admin-dashboard');
-    else if (user.role === 'Agent') setActiveTab('agent-dashboard');
-    else if (user.role === 'Franchisee') setActiveTab('franchisee-dashboard');
+    if (mapFranchiseeId) {
+      setSelectedMapFranchiseeId(mapFranchiseeId);
+      setActiveTab('franchise-map');
+    } else if (targetTab) {
+      setActiveTab(targetTab);
+    } else if (user.role === 'Admin') {
+      setActiveTab('admin-dashboard');
+    } else if (user.role === 'Agent') {
+      setActiveTab('agent-dashboard');
+    } else if (user.role === 'Franchisee') {
+      setActiveTab('franchisee-dashboard');
+    }
   };
 
   const handleLogout = () => {
@@ -392,7 +407,7 @@ export default function App() {
   };
 
   if (!currentUser) {
-    return <LoginView onLoginSuccess={handleLoginSuccess} />;
+    return <LoginView onLoginSuccess={handleLoginSuccess} onDataChange={refreshAllData} />;
   }
 
   // Pending counts for sidebar badges
@@ -428,8 +443,8 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
-          {/* ADMIN VIEWS */}
-          {currentUser.role === 'Admin' && (
+          {/* ADMIN & SUPER ADMIN VIEWS */}
+          {(currentUser.role === 'Admin' || currentUser.role === 'Super Admin') && (
             <>
               {activeTab === 'admin-dashboard' && (
                 <AdminDashboard
@@ -473,8 +488,12 @@ export default function App() {
 
               {activeTab === 'franchisees' && (
                 <FranchiseesView
+                  currentUser={currentUser}
+                  onUpdateRole={(newRole) => setCurrentUser(prev => prev ? { ...prev, role: newRole } : null)}
                   franchisees={franchisees}
                   onAddFranchisee={handleAddFranchisee}
+                  onRefreshFranchisees={refreshAllData}
+                  onNavigateToMap={handleNavigateToMap}
                 />
               )}
 

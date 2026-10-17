@@ -49,3 +49,17 @@ INSERT INTO `recruits` (`id`, `reference_number`, `agent_id`, `prospect_full_nam
 INSERT INTO `franchisees` (`id`, `user_id`, `franchise_name`, `representative_name`, `contact_number`, `email`, `business_address`, `city`, `province`, `franchise_type`, `franchise_start_date`, `freezer_units_count`) VALUES
 ('frn-1', 'usr-fran-1', 'Aice Ice Cream Parlor - SM Fairview Hub', 'Elena Valenzuela', '+63 920 333 1188', 'franchise.valenzuela@aice.ph', 'Ground Floor, Commercial Strip, SM City Fairview', 'Quezon City', 'Metro Manila', 'Commercial Parlor', '2026-03-01', 4),
 ('frn-2', 'usr-fran-2', 'Aice Kiosk - Davao City Plaza', 'Mark Dalisay', '+63 919 777 6622', 'franchise.davao@aice.ph', 'Claveria St, Poblacion District', 'Davao City', 'Davao del Sur', 'Standard Kiosk', '2026-04-10', 2);
+
+-- Franchisee Warnings Seed
+INSERT INTO `franchisee_warnings` (`id`, `franchisee_id`, `warning_level`, `category`, `message`, `resolution_due_date`, `issued_by_user_id`, `issued_by_name`, `created_at`) VALUES
+('warn-101', 'frn-2', '1st', 'late payment', 'Delayed royalty and supply settlement for September 2026 cycle. Balance outstanding: Php 18,500.', '2026-10-25', 'usr-admin-1', 'Carlos Mendoza', '2026-10-12 10:00:00');
+
+-- Franchisee Status History Seed
+INSERT INTO `franchisee_status_history` (`id`, `franchisee_id`, `changed_by_user_id`, `changed_by_name`, `changed_by_role`, `action_type`, `previous_status`, `new_status`, `reason`, `created_at`) VALUES
+('fsh-1', 'frn-1', 'usr-admin-1', 'Carlos Mendoza', 'Admin', 'CREATE', 'Pending', 'Active', 'Initial franchise onboarding agreement signed and verified.', '2026-02-15 11:00:00'),
+('fsh-2', 'frn-2', 'usr-admin-1', 'Carlos Mendoza', 'Admin', 'WARNING_ISSUED', 'Active', 'Under Warning', 'Issued 1st Warning for late payment of September supply settlement invoice.', '2026-10-12 10:00:00');
+
+-- Audit Log Seed
+INSERT INTO `audit_log` (`id`, `actor_id`, `actor_name`, `actor_role`, `action`, `target_type`, `target_id`, `target_name`, `reason`, `created_at`) VALUES
+('aud-1', 'usr-admin-1', 'Carlos Mendoza', 'Admin', 'CREATE_FRANCHISEE', 'Franchisee', 'frn-1', 'Aice Ice Cream Parlor - SM Fairview Hub', 'Approved recruit application and created franchisee record.', '2026-02-15 11:00:00'),
+('aud-2', 'usr-admin-1', 'Carlos Mendoza', 'Admin', 'SEND_WARNING', 'Franchisee', 'frn-2', 'Aice Kiosk - Davao City Plaza', 'Issued 1st Warning for late payment.', '2026-10-12 10:00:00');

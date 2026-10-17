@@ -83,8 +83,39 @@ export const StatusBadge: React.FC<Props> = ({ status, size = 'sm' }) => {
         </span>
       );
 
-    case 'Inactive':
+    case 'Pending':
+      return (
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-amber-50 text-amber-800 border border-amber-300 ${textSize}`}>
+          <Clock className="w-3.5 h-3.5 text-amber-600" />
+          Pending
+        </span>
+      );
+
+    case 'Under Warning':
+      return (
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-orange-50 text-orange-800 border border-orange-300 ${textSize}`}>
+          <AlertTriangle className="w-3.5 h-3.5 text-orange-600" />
+          Under Warning
+        </span>
+      );
+
     case 'Suspended':
+      return (
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-rose-50 text-rose-800 border border-rose-300 ${textSize}`}>
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+          Suspended
+        </span>
+      );
+
+    case 'Terminated':
+      return (
+        <span className={`inline-flex items-center gap-1.5 rounded-full font-semibold bg-slate-100 text-slate-800 border border-slate-300 line-through decoration-slate-400 ${textSize}`}>
+          <XCircle className="w-3.5 h-3.5 text-slate-500" />
+          Terminated
+        </span>
+      );
+
+    case 'Inactive':
       return (
         <span className={`inline-flex items-center gap-1.5 rounded-full font-medium bg-slate-100 text-slate-700 border border-slate-200 ${textSize}`}>
           {status}

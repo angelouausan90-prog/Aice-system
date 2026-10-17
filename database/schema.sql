@@ -282,3 +282,65 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 13. FRANCHISEE MANAGEMENT MODULE EXTENSIONS
+-- Table: franchisee_warnings (Administrative warnings, levels, categories, deadlines)
+CREATE TABLE IF NOT EXISTS `franchisee_warnings` (
+  `id` VARCHAR(64) NOT NULL,
+  `franchisee_id` VARCHAR(64) NOT NULL,
+  `warning_level` ENUM('1st', '2nd', 'Final') NOT NULL,
+  `category` ENUM('late payment', 'low sales', 'policy violation', 'hygiene/quality', 'other') NOT NULL,
+  `message` TEXT NOT NULL,
+  `resolution_due_date` DATE NULL,
+  `issued_by_user_id` VARCHAR(64) NOT NULL,
+  `issued_by_name` VARCHAR(100) NOT NULL,
+  `is_resolved` TINYINT(1) NOT NULL DEFAULT 0,
+  `resolved_at` DATETIME NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_fw_franchisee` (`franchisee_id`),
+  INDEX `idx_fw_level` (`warning_level`),
+  INDEX `idx_fw_created` (`created_at`),
+  CONSTRAINT `fk_fw_franchisee` FOREIGN KEY (`franchisee_id`) REFERENCES `franchisees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_fw_user` FOREIGN KEY (`issued_by_user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: franchisee_status_history (Lifecycle transitions: Warning, Suspend, Terminate, Reinstate)
+CREATE TABLE IF NOT EXISTS `franchisee_status_history` (
+  `id` VARCHAR(64) NOT NULL,
+  `franchisee_id` VARCHAR(64) NOT NULL,
+  `changed_by_user_id` VARCHAR(64) NOT NULL,
+  `changed_by_name` VARCHAR(100) NOT NULL,
+  `changed_by_role` VARCHAR(50) NOT NULL,
+  `action_type` ENUM('CREATE', 'EDIT', 'WARNING_ISSUED', 'SUSPEND', 'TERMINATE', 'REINSTATE') NOT NULL,
+  `previous_status` VARCHAR(50) NOT NULL,
+  `new_status` VARCHAR(50) NOT NULL,
+  `reason` TEXT NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_fsh_franchisee` (`franchisee_id`),
+  INDEX `idx_fsh_created` (`created_at`),
+  CONSTRAINT `fk_fsh_franchisee` FOREIGN KEY (`franchisee_id`) REFERENCES `franchisees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_fsh_user` FOREIGN KEY (`changed_by_user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: audit_log (Admin audit trail with actor, target, old/new changes, reason)
+CREATE TABLE IF NOT EXISTS `audit_log` (
+  `id` VARCHAR(64) NOT NULL,
+  `actor_id` VARCHAR(64) NOT NULL,
+  `actor_name` VARCHAR(100) NOT NULL,
+  `actor_role` ENUM('Super Admin', 'Admin') NOT NULL,
+  `action` VARCHAR(100) NOT NULL,
+  `target_type` VARCHAR(50) NOT NULL DEFAULT 'Franchisee',
+  `target_id` VARCHAR(64) NOT NULL,
+  `target_name` VARCHAR(150) NULL,
+  `old_values` JSON NULL,
+  `new_values` JSON NULL,
+  `reason` TEXT NULL,
+  `ip_address` VARCHAR(45) NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_audit_actor` (`actor_id`),
+  INDEX `idx_audit_target` (`target_type`, `target_id`),
+  INDEX `idx_audit_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

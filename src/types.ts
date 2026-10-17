@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type UserRole = 'Admin' | 'Franchisee' | 'Agent';
+export type UserRole = 'Super Admin' | 'Admin' | 'Franchisee' | 'Agent';
 export type AccountStatus = 'Active' | 'Inactive' | 'Suspended';
+export type FranchiseeStatus = 'Pending' | 'Active' | 'Under Warning' | 'Suspended' | 'Terminated';
+export type RenewalStatus = 'Active' | 'Expiring Soon' | 'Expired' | 'Renewed' | 'Under Review';
 
 export interface User {
   id: string;
@@ -16,6 +18,32 @@ export interface User {
   lastLoginAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FranchiseeWarning {
+  id: string;
+  franchiseeId: string;
+  warningLevel: '1st' | '2nd' | 'Final';
+  category: 'late payment' | 'low sales' | 'policy violation' | 'hygiene/quality' | 'other';
+  message: string;
+  resolutionDueDate?: string;
+  issuedByUserId: string;
+  issuedByName: string;
+  isResolved?: boolean;
+  createdAt: string;
+}
+
+export interface FranchiseeStatusHistory {
+  id: string;
+  franchiseeId: string;
+  changedByUserId: string;
+  changedByName: string;
+  changedByRole: string;
+  actionType: 'CREATE' | 'EDIT' | 'WARNING_ISSUED' | 'SUSPEND' | 'TERMINATE' | 'REINSTATE';
+  previousStatus: string;
+  newStatus: string;
+  reason: string;
+  createdAt: string;
 }
 
 export interface FranchiseeProfile {
@@ -30,13 +58,25 @@ export interface FranchiseeProfile {
   province: string;
   franchiseType: 'Pocket Store' | 'Standard Kiosk' | 'Commercial Parlor' | 'Mobile Cart';
   franchiseStartDate: string;
+  agreementStartDate?: string;
+  agreementEndDate?: string;
+  renewalStatus?: RenewalStatus;
+  status?: FranchiseeStatus;
+  warningCount?: number;
+  totalOrdersCount: number;
+  freezerUnitsCount: number;
+  totalSalesPhp?: number;
+  pendingBalancePhp?: number;
+  settlementFlag?: boolean;
+  lastActivityAt?: string;
+  softDeletedAt?: string;
   createdFromRecruitmentId?: string;
   accountStatus: AccountStatus;
   notes?: string;
-  totalOrdersCount: number;
-  freezerUnitsCount: number;
   latitude?: number;
   longitude?: number;
+  warnings?: FranchiseeWarning[];
+  statusHistory?: FranchiseeStatusHistory[];
   createdAt: string;
   updatedAt: string;
 }

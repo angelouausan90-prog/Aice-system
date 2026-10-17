@@ -51,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   let navItems: NavItem[] = [];
 
-  if (currentRole === 'Admin') {
+  if (currentRole === 'Admin' || currentRole === 'Super Admin') {
     navItems = [
       { id: 'admin-dashboard', label: 'Admin Dashboard', icon: LayoutDashboard },
       { id: 'franchise-map', label: 'Store Locations Map', icon: MapPin },
@@ -95,6 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           Navigation Portal
         </div>
         <div className="text-sm font-semibold text-white mt-0.5">
+          {currentRole === 'Super Admin' && 'Super Administration'}
           {currentRole === 'Admin' && 'System Administration'}
           {currentRole === 'Agent' && 'Recruitment Field Agent'}
           {currentRole === 'Franchisee' && 'Franchise Operations'}

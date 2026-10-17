@@ -133,6 +133,119 @@ const agents: AgentProfile[] = [
   },
 ];
 
+interface WarningRecord {
+  id: string;
+  franchiseeId: string;
+  warningLevel: '1st' | '2nd' | 'Final';
+  category: 'late payment' | 'low sales' | 'policy violation' | 'hygiene/quality' | 'other';
+  message: string;
+  resolutionDueDate?: string;
+  issuedByUserId: string;
+  issuedByName: string;
+  isResolved?: boolean;
+  createdAt: string;
+}
+
+interface StatusHistoryRecord {
+  id: string;
+  franchiseeId: string;
+  changedByUserId: string;
+  changedByName: string;
+  changedByRole: string;
+  actionType: 'CREATE' | 'EDIT' | 'WARNING_ISSUED' | 'SUSPEND' | 'TERMINATE' | 'REINSTATE';
+  previousStatus: string;
+  newStatus: string;
+  reason: string;
+  createdAt: string;
+}
+
+const franchiseeWarnings: WarningRecord[] = [
+  {
+    id: 'warn-101',
+    franchiseeId: 'frn-2',
+    warningLevel: '1st',
+    category: 'late payment',
+    message: 'Delayed royalty and supply settlement for September 2026 cycle. Balance outstanding: Php 18,500.',
+    resolutionDueDate: '2026-10-25',
+    issuedByUserId: 'usr-admin-1',
+    issuedByName: 'Carlos Mendoza',
+    createdAt: '2026-10-12T10:00:00.000Z',
+  },
+  {
+    id: 'warn-102',
+    franchiseeId: 'frn-5',
+    warningLevel: '1st',
+    category: 'hygiene/quality',
+    message: 'Freezer temperature exceeded optimal storage range (-12°C recorded instead of -18°C). Required immediate recalibration.',
+    resolutionDueDate: '2026-09-15',
+    issuedByUserId: 'usr-admin-1',
+    issuedByName: 'Carlos Mendoza',
+    createdAt: '2026-09-08T14:30:00.000Z',
+  },
+  {
+    id: 'warn-103',
+    franchiseeId: 'frn-5',
+    warningLevel: '2nd',
+    category: 'policy violation',
+    message: 'Unauthorized display of third-party frozen novelties inside official Aice branded deep freezer unit.',
+    resolutionDueDate: '2026-10-05',
+    issuedByUserId: 'usr-admin-1',
+    issuedByName: 'Carlos Mendoza',
+    createdAt: '2026-10-01T09:15:00.000Z',
+  },
+];
+
+const franchiseeStatusHistory: StatusHistoryRecord[] = [
+  {
+    id: 'fsh-1',
+    franchiseeId: 'frn-1',
+    changedByUserId: 'usr-admin-1',
+    changedByName: 'Carlos Mendoza',
+    changedByRole: 'Admin',
+    actionType: 'CREATE',
+    previousStatus: 'Pending',
+    newStatus: 'Active',
+    reason: 'Initial franchise onboarding agreement signed and verified.',
+    createdAt: '2026-02-15T11:00:00.000Z',
+  },
+  {
+    id: 'fsh-2',
+    franchiseeId: 'frn-2',
+    changedByUserId: 'usr-admin-1',
+    changedByName: 'Carlos Mendoza',
+    changedByRole: 'Admin',
+    actionType: 'WARNING_ISSUED',
+    previousStatus: 'Active',
+    newStatus: 'Under Warning',
+    reason: 'Issued 1st Warning for late payment of September supply settlement invoice.',
+    createdAt: '2026-10-12T10:00:00.000Z',
+  },
+  {
+    id: 'fsh-3',
+    franchiseeId: 'frn-5',
+    changedByUserId: 'usr-admin-1',
+    changedByName: 'Carlos Mendoza',
+    changedByRole: 'Admin',
+    actionType: 'SUSPEND',
+    previousStatus: 'Under Warning',
+    newStatus: 'Suspended',
+    reason: 'Temporary administrative suspension pending audit of contract compliance after 2nd warning.',
+    createdAt: '2026-10-10T16:00:00.000Z',
+  },
+  {
+    id: 'fsh-4',
+    franchiseeId: 'frn-6',
+    changedByUserId: 'usr-admin-1',
+    changedByName: 'Carlos Mendoza',
+    changedByRole: 'Super Admin',
+    actionType: 'TERMINATE',
+    previousStatus: 'Suspended',
+    newStatus: 'Terminated',
+    reason: 'Mutual contract termination and mall kiosk space deconsolidation.',
+    createdAt: '2026-10-01T10:00:00.000Z',
+  },
+];
+
 const franchisees: FranchiseeProfile[] = [
   {
     id: 'frn-1',
@@ -146,13 +259,22 @@ const franchisees: FranchiseeProfile[] = [
     province: 'Metro Manila',
     franchiseType: 'Commercial Parlor',
     franchiseStartDate: '2026-03-01',
+    agreementStartDate: '2026-03-01',
+    agreementEndDate: '2027-03-01',
+    renewalStatus: 'Active',
+    status: 'Active',
+    warningCount: 0,
     createdFromRecruitmentId: 'rec-101',
     accountStatus: 'Active',
     notes: 'Premier flagship parlor with heavy weekend foot traffic.',
     totalOrdersCount: 28,
     freezerUnitsCount: 4,
+    totalSalesPhp: 485000,
+    pendingBalancePhp: 0,
+    settlementFlag: false,
     latitude: 14.7338,
     longitude: 121.0583,
+    lastActivityAt: '2026-10-16T14:30:00.000Z',
     createdAt: '2026-02-15T11:00:00.000Z',
     updatedAt: new Date().toISOString(),
   },
@@ -168,13 +290,22 @@ const franchisees: FranchiseeProfile[] = [
     province: 'Davao del Sur',
     franchiseType: 'Standard Kiosk',
     franchiseStartDate: '2026-04-10',
+    agreementStartDate: '2026-04-10',
+    agreementEndDate: '2027-04-10',
+    renewalStatus: 'Active',
+    status: 'Under Warning',
+    warningCount: 1,
     createdFromRecruitmentId: 'rec-102',
     accountStatus: 'Active',
     notes: 'High school and office corridor location.',
     totalOrdersCount: 19,
     freezerUnitsCount: 2,
+    totalSalesPhp: 312000,
+    pendingBalancePhp: 18500,
+    settlementFlag: false,
     latitude: 7.0736,
     longitude: 125.6128,
+    lastActivityAt: '2026-10-15T09:15:00.000Z',
     createdAt: '2026-03-01T08:30:00.000Z',
     updatedAt: new Date().toISOString(),
   },
@@ -190,13 +321,22 @@ const franchisees: FranchiseeProfile[] = [
     province: 'Metro Manila',
     franchiseType: 'Standard Kiosk',
     franchiseStartDate: '2026-10-08',
+    agreementStartDate: '2026-10-08',
+    agreementEndDate: '2027-10-08',
+    renewalStatus: 'Under Review',
+    status: 'Pending',
+    warningCount: 0,
     createdFromRecruitmentId: 'rec-204',
     accountStatus: 'Active',
     notes: 'Approved from recruit REC-2026-00204. High-rise condominium commercial lobby.',
     totalOrdersCount: 5,
     freezerUnitsCount: 2,
+    totalSalesPhp: 82000,
+    pendingBalancePhp: 0,
+    settlementFlag: false,
     latitude: 14.5547,
     longitude: 121.0244,
+    lastActivityAt: '2026-10-16T11:20:00.000Z',
     createdAt: '2026-10-08T15:30:00.000Z',
     updatedAt: new Date().toISOString(),
   },
@@ -212,12 +352,21 @@ const franchisees: FranchiseeProfile[] = [
     province: 'Cebu',
     franchiseType: 'Commercial Parlor',
     franchiseStartDate: '2026-05-12',
+    agreementStartDate: '2026-05-12',
+    agreementEndDate: '2027-05-12',
+    renewalStatus: 'Active',
+    status: 'Active',
+    warningCount: 0,
     accountStatus: 'Active',
     notes: '24/7 BPO corridor location with high night-shift impulse purchases.',
     totalOrdersCount: 14,
     freezerUnitsCount: 3,
+    totalSalesPhp: 265000,
+    pendingBalancePhp: 0,
+    settlementFlag: false,
     latitude: 10.3297,
     longitude: 123.9066,
+    lastActivityAt: '2026-10-16T18:00:00.000Z',
     createdAt: '2026-05-12T09:00:00.000Z',
     updatedAt: new Date().toISOString(),
   },
@@ -233,14 +382,54 @@ const franchisees: FranchiseeProfile[] = [
     province: 'Metro Manila',
     franchiseType: 'Pocket Store',
     franchiseStartDate: '2026-07-20',
-    accountStatus: 'Active',
-    notes: 'Sari-sari store transformation with high neighborhood traffic.',
+    agreementStartDate: '2026-07-20',
+    agreementEndDate: '2027-07-20',
+    renewalStatus: 'Expiring Soon',
+    status: 'Suspended',
+    warningCount: 2,
+    accountStatus: 'Suspended',
+    notes: 'Sari-sari store transformation. Suspended due to unaddressed 2nd warning.',
     totalOrdersCount: 11,
     freezerUnitsCount: 1,
+    totalSalesPhp: 148000,
+    pendingBalancePhp: 24200,
+    settlementFlag: false,
     latitude: 14.5764,
     longitude: 121.0611,
+    lastActivityAt: '2026-10-10T16:00:00.000Z',
     createdAt: '2026-07-20T10:00:00.000Z',
     updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'frn-6',
+    userId: 'usr-fran-6',
+    franchiseName: 'Aice Cart - Alabang Town Center',
+    representativeName: 'Benjamin Santos',
+    contactNumber: '+63 915 222 3344',
+    email: 'benjamin.s@gmail.com',
+    businessAddress: 'Upper Ground Activity Center, Alabang-Zapote Rd, Muntinlupa',
+    city: 'Muntinlupa City',
+    province: 'Metro Manila',
+    franchiseType: 'Mobile Cart',
+    franchiseStartDate: '2026-01-10',
+    agreementStartDate: '2026-01-10',
+    agreementEndDate: '2026-10-01',
+    renewalStatus: 'Expired',
+    status: 'Terminated',
+    warningCount: 3,
+    accountStatus: 'Suspended',
+    notes: 'Mutual termination executed by Super Admin. Pending inventory audit.',
+    totalOrdersCount: 8,
+    freezerUnitsCount: 1,
+    totalSalesPhp: 94000,
+    pendingBalancePhp: 12000,
+    settlementFlag: true,
+    softDeletedAt: '2026-10-01T10:00:00.000Z',
+    latitude: 14.4255,
+    longitude: 121.0319,
+    lastActivityAt: '2026-10-01T10:00:00.000Z',
+    createdAt: '2026-01-10T09:00:00.000Z',
+    updatedAt: '2026-10-01T10:00:00.000Z',
   }
 ];
 
@@ -1099,7 +1288,9 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
 
   // Return user info and profile
   const agentProfile = user.role === 'Agent' ? agents.find(a => a.userId === user.id) : undefined;
-  const franchiseProfile = user.role === 'Franchisee' ? franchisees.find(f => f.userId === user.id) : undefined;
+  let franchiseProfile = user.role === 'Franchisee' 
+    ? (franchisees.find(f => f.userId === user.id) || franchisees.find(f => f.email?.toLowerCase() === user.email?.toLowerCase() || f.representativeName?.toLowerCase() === user.fullName?.toLowerCase()))
+    : undefined;
 
   logAudit(user.id, user.fullName, user.role, 'LOGIN', 'USERS', user.id, `User logged in successfully as ${user.role}.`);
 
@@ -1107,6 +1298,178 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
     user,
     agentProfile,
     franchiseProfile,
+  });
+});
+
+// Franchisee Sign-Up & Business Location Application
+app.post('/api/auth/franchisee-signup', (req: Request, res: Response) => {
+  const {
+    fullName,
+    email,
+    phone,
+    username,
+    password,
+    storeName,
+    franchiseType,
+    city,
+    province,
+    businessAddress,
+    landmarkOrNotes,
+    latitude,
+    longitude,
+    preferredContactMethod,
+    autoApprove
+  } = req.body;
+
+  if (!fullName || !phone || !city || !storeName) {
+    return res.status(400).json({ error: 'Applicant name, contact phone, store name, and city are required.' });
+  }
+
+  const generatedUsername = username ? username.trim().toLowerCase() : `franchise.${city.toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(Math.random() * 900 + 100)}`;
+  const cleanEmail = email ? email.trim().toLowerCase() : `${generatedUsername}@aice.ph`;
+
+  // Check duplicate username if explicitly provided
+  if (username && users.some(u => u.username.toLowerCase() === username.trim().toLowerCase())) {
+    return res.status(400).json({ error: `Username "${username}" is already in use. Please choose another.` });
+  }
+
+  // Resolve geographical coordinates for map tracking
+  const coords = (latitude && longitude && !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude)))
+    ? { latitude: parseFloat(latitude), longitude: parseFloat(longitude) }
+    : resolveCityCoordinates(city, province || 'Metro Manila');
+
+  const formattedStoreName = storeName.trim();
+  const formattedAddress = businessAddress && businessAddress.trim() 
+    ? businessAddress.trim() 
+    : `${city}, ${province || 'Metro Manila'}`;
+  const resolvedPackage = (franchiseType as any) || 'Standard Kiosk';
+  const freezers = resolvedPackage === 'Commercial Parlor' ? 4 : (resolvedPackage === 'Standard Kiosk' ? 2 : 1);
+
+  // 1. Create User account
+  const newUser: User = {
+    id: `usr-fran-${Date.now()}`,
+    username: generatedUsername,
+    email: cleanEmail,
+    fullName: fullName.trim(),
+    role: 'Franchisee',
+    accountStatus: 'Active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  users.push(newUser);
+
+  // 2. Create Application Recruit record in verification pipeline
+  const refNumber = `APP-2026-${String(recruits.length + 101).padStart(4, '0')}`;
+  const newRecruit: Recruit = {
+    id: `rec-${Date.now()}`,
+    referenceNumber: refNumber,
+    agentId: 'agt-portal',
+    agentName: 'Online Franchisee Sign-Up Portal',
+    prospectFullName: fullName.trim(),
+    phone: phone.trim(),
+    email: cleanEmail,
+    city: city.trim(),
+    province: (province || 'Metro Manila').trim(),
+    businessAddress: formattedAddress,
+    storeName: formattedStoreName,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    preferredContactMethod: preferredContactMethod || 'Phone Call',
+    businessInterest: resolvedPackage,
+    recruitmentSource: 'Direct Field Canvassing',
+    initialContactDate: new Date().toISOString().split('T')[0],
+    salesConversationNotes: `Direct online franchisee sign-up application. Proposed Store: "${formattedStoreName}" at physical address: ${formattedAddress}. Landmark/Notes: ${landmarkOrNotes || 'None'}. Registered coordinates: [${coords.latitude}, ${coords.longitude}].`,
+    prospectInterestLevel: 'High',
+    prospectConsentConfirmed: true,
+    status: autoApprove ? 'Approved' : 'Pending Verification',
+    submittedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    approvedAt: autoApprove ? new Date().toISOString() : undefined,
+    attachments: [],
+    statusHistory: [
+      {
+        id: `sh-${Date.now()}`,
+        recruitId: `rec-${Date.now()}`,
+        changedByUserId: newUser.id,
+        changedByUserName: fullName,
+        previousStatus: 'Pending Verification',
+        newStatus: autoApprove ? 'Approved' : 'Pending Verification',
+        comment: autoApprove 
+          ? 'Instant demo approval applied. Store location registered on live map.'
+          : 'Franchisee applicant registered store location details via portal.',
+        createdAt: new Date().toISOString(),
+      }
+    ]
+  };
+
+  recruits.unshift(newRecruit);
+
+  // 3. If autoApprove is true, immediately register store on Franchise Location Map!
+  let newFranchisee: FranchiseeProfile | undefined;
+  if (autoApprove) {
+    newFranchisee = {
+      id: `frn-app-${Date.now()}`,
+      userId: newUser.id,
+      franchiseName: formattedStoreName,
+      representativeName: fullName.trim(),
+      contactNumber: phone.trim(),
+      email: cleanEmail,
+      businessAddress: formattedAddress,
+      city: city.trim(),
+      province: (province || 'Metro Manila').trim(),
+      franchiseType: resolvedPackage,
+      franchiseStartDate: new Date().toISOString().split('T')[0],
+      createdFromRecruitmentId: newRecruit.id,
+      accountStatus: 'Active',
+      notes: `Registered business location approved from direct portal sign-up #${refNumber}.`,
+      totalOrdersCount: 0,
+      freezerUnitsCount: freezers,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    franchisees.unshift(newFranchisee);
+    newRecruit.convertedFranchiseeId = newFranchisee.id;
+
+    logAudit(
+      newUser.id,
+      fullName,
+      'Franchisee',
+      'REGISTER_MAP_LOCATION',
+      'FRANCHISEES',
+      newFranchisee.id,
+      `Approved and registered business location "${formattedStoreName}" in ${city} on live Franchise Location Map Tracker.`
+    );
+  } else {
+    logAudit(
+      newUser.id,
+      fullName,
+      'Franchisee',
+      'SIGNUP_APPLICATION',
+      'RECRUITS',
+      newRecruit.id,
+      `Prospective franchisee ${fullName} submitted registration for store "${formattedStoreName}" in ${city}. Pending Admin verification.`
+    );
+  }
+
+  pushNotification(
+    'usr-admin-1',
+    autoApprove ? 'New Store Location Live on Map!' : 'New Franchisee Application & Store Location',
+    `${fullName} registered store "${formattedStoreName}" in ${city} (${resolvedPackage}). ${autoApprove ? 'Store is live on map tracker.' : 'Pending review in Recruitment Queue.'}`,
+    'RECRUITMENT',
+    'RECRUIT',
+    newRecruit.id
+  );
+
+  res.status(201).json({
+    message: autoApprove 
+      ? 'Franchise account created and store location successfully registered on the Map Tracker!'
+      : 'Application submitted! Your business location info has been registered for approval.',
+    user: newUser,
+    recruit: newRecruit,
+    franchisee: newFranchisee,
+    autoApproved: !!autoApprove,
   });
 });
 
@@ -1180,6 +1543,378 @@ app.post('/api/franchisees', (req: Request, res: Response) => {
   pushNotification(newUser.id, 'Welcome to Aice Franchise Portal', 'Your official Aice franchise business account has been initialized and activated.', 'ACCOUNT', 'FRANCHISEE', newFranchisee.id);
 
   res.status(201).json(newFranchisee);
+});
+
+// Franchisee Inspection: Full profile, agreement, performance, map coordinates, warnings, and history
+app.get('/api/franchisees/:id/inspect', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userRole = (req.headers['x-user-role'] as string) || 'Admin';
+
+  if (userRole !== 'Super Admin' && userRole !== 'Admin') {
+    return res.status(403).json({ error: 'Access Denied: Administrative authority required.' });
+  }
+
+  const franchisee = franchisees.find(f => f.id === id);
+  if (!franchisee) {
+    return res.status(404).json({ error: 'Franchisee not found.' });
+  }
+
+  const warnings = franchiseeWarnings.filter(w => w.franchiseeId === id);
+  const history = franchiseeStatusHistory.filter(h => h.franchiseeId === id);
+  const recentOrders = supplyRequests.filter(s => s.franchiseeId === id).slice(0, 5);
+
+  res.json({
+    profile: franchisee,
+    agreement: {
+      startDate: franchisee.agreementStartDate || franchisee.franchiseStartDate,
+      endDate: franchisee.agreementEndDate || '2027-03-01',
+      renewalStatus: franchisee.renewalStatus || 'Active',
+      franchiseType: franchisee.franchiseType,
+    },
+    performance: {
+      totalSalesPhp: franchisee.totalSalesPhp || 0,
+      totalOrdersCount: franchisee.totalOrdersCount || 0,
+      freezerUnitsCount: franchisee.freezerUnitsCount || 1,
+      estimatedStockTubs: (franchisee.freezerUnitsCount || 1) * 120,
+      pendingBalancePhp: franchisee.pendingBalancePhp || 0,
+      settlementFlag: franchisee.settlementFlag || false,
+      recentOrders,
+    },
+    mapLocation: {
+      latitude: franchisee.latitude || 14.5995,
+      longitude: franchisee.longitude || 120.9842,
+      businessAddress: franchisee.businessAddress,
+      city: franchisee.city,
+      province: franchisee.province,
+    },
+    warnings,
+    statusHistory: history,
+  });
+});
+
+// Edit Franchisee Details
+app.put('/api/franchisees/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userRole = (req.headers['x-user-role'] as string) || 'Admin';
+  const actorId = (req.headers['x-user-id'] as string) || 'usr-admin-1';
+  const actorName = (req.headers['x-user-name'] as string) || 'Carlos Mendoza';
+
+  if (userRole !== 'Super Admin' && userRole !== 'Admin') {
+    return res.status(403).json({ error: 'Access Denied: Administrative authority required.' });
+  }
+
+  const franchisee = franchisees.find(f => f.id === id);
+  if (!franchisee) {
+    return res.status(404).json({ error: 'Franchisee not found.' });
+  }
+
+  const data = req.body;
+  if (!data.franchiseName || !data.representativeName || !data.city) {
+    return res.status(400).json({ error: 'Franchise name, representative name, and city are required.' });
+  }
+
+  const oldValues = {
+    franchiseName: franchisee.franchiseName,
+    representativeName: franchisee.representativeName,
+    contactNumber: franchisee.contactNumber,
+    email: franchisee.email,
+    businessAddress: franchisee.businessAddress,
+    city: franchisee.city,
+    province: franchisee.province,
+    franchiseType: franchisee.franchiseType,
+    agreementStartDate: franchisee.agreementStartDate,
+    agreementEndDate: franchisee.agreementEndDate,
+    renewalStatus: franchisee.renewalStatus,
+    notes: franchisee.notes,
+  };
+
+  franchisee.franchiseName = data.franchiseName.trim();
+  franchisee.representativeName = data.representativeName.trim();
+  if (data.contactNumber) franchisee.contactNumber = data.contactNumber.trim();
+  if (data.email) franchisee.email = data.email.trim();
+  if (data.businessAddress) franchisee.businessAddress = data.businessAddress.trim();
+  if (data.city) franchisee.city = data.city.trim();
+  if (data.province) franchisee.province = data.province.trim();
+  if (data.franchiseType) franchisee.franchiseType = data.franchiseType;
+  if (data.agreementStartDate) franchisee.agreementStartDate = data.agreementStartDate;
+  if (data.agreementEndDate) franchisee.agreementEndDate = data.agreementEndDate;
+  if (data.renewalStatus) franchisee.renewalStatus = data.renewalStatus;
+  if (data.notes !== undefined) franchisee.notes = data.notes;
+  franchisee.lastActivityAt = new Date().toISOString();
+  franchisee.updatedAt = new Date().toISOString();
+
+  logAudit(actorId, actorName, userRole as any, 'EDIT_FRANCHISEE', 'FRANCHISEES', franchisee.id, `Admin modified profile details for ${franchisee.franchiseName}.`);
+
+  res.json({ success: true, message: 'Franchisee updated successfully.', franchisee });
+});
+
+// Send Warning to Franchisee
+app.post('/api/franchisees/:id/warning', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userRole = (req.headers['x-user-role'] as string) || 'Admin';
+  const actorId = (req.headers['x-user-id'] as string) || 'usr-admin-1';
+  const actorName = (req.headers['x-user-name'] as string) || 'Carlos Mendoza';
+
+  if (userRole !== 'Super Admin' && userRole !== 'Admin') {
+    return res.status(403).json({ error: 'Access Denied: Administrative authority required.' });
+  }
+
+  const franchisee = franchisees.find(f => f.id === id);
+  if (!franchisee) {
+    return res.status(404).json({ error: 'Franchisee not found.' });
+  }
+
+  const { warningLevel, category, message, resolutionDueDate } = req.body;
+  if (!warningLevel || !category || !message) {
+    return res.status(400).json({ error: 'Warning level, category, and message explanation are required.' });
+  }
+
+  const warningRecord: WarningRecord = {
+    id: `warn-${Date.now()}`,
+    franchiseeId: franchisee.id,
+    warningLevel: warningLevel as any,
+    category: category as any,
+    message: message.trim(),
+    resolutionDueDate: resolutionDueDate || undefined,
+    issuedByUserId: actorId,
+    issuedByName: actorName,
+    createdAt: new Date().toISOString(),
+  };
+  franchiseeWarnings.unshift(warningRecord);
+
+  const prevStatus = franchisee.status || 'Active';
+  const newStatus = 'Under Warning';
+  franchisee.warningCount = (franchisee.warningCount || 0) + 1;
+  franchisee.status = newStatus;
+  franchisee.lastActivityAt = new Date().toISOString();
+  franchisee.updatedAt = new Date().toISOString();
+
+  // Status History
+  franchiseeStatusHistory.unshift({
+    id: `fsh-${Date.now()}`,
+    franchiseeId: franchisee.id,
+    changedByUserId: actorId,
+    changedByName: actorName,
+    changedByRole: userRole,
+    actionType: 'WARNING_ISSUED',
+    previousStatus: prevStatus,
+    newStatus,
+    reason: `Issued ${warningLevel} Warning [${category}]: ${message}`,
+    createdAt: new Date().toISOString(),
+  });
+
+  // Push Notification to Franchisee
+  pushNotification(
+    franchisee.userId,
+    `Official ${warningLevel} Warning: ${category}`,
+    `Warning notice from HQ: ${message}${resolutionDueDate ? ' (Deadline: ' + resolutionDueDate + ')' : ''}`,
+    'ACCOUNT',
+    'FRANCHISEE',
+    warningRecord.id
+  );
+
+  logAudit(actorId, actorName, userRole as any, 'SEND_WARNING', 'FRANCHISEES', franchisee.id, `Issued ${warningLevel} warning [${category}] to ${franchisee.franchiseName}. Total warnings: ${franchisee.warningCount}.`);
+
+  const suggestEscalation = (franchisee.warningCount >= 2 || warningLevel === 'Final');
+
+  res.json({
+    success: true,
+    message: `Warning issued to ${franchisee.franchiseName}.`,
+    warning: warningRecord,
+    franchisee,
+    suggestEscalation,
+    escalationMessage: suggestEscalation
+      ? `Escalation Recommended: Franchisee now has ${franchisee.warningCount} warnings on file. Consider initiating formal contract suspension review.`
+      : null,
+  });
+});
+
+// Suspend Franchisee (Admin & Super Admin)
+app.post('/api/franchisees/:id/suspend', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userRole = (req.headers['x-user-role'] as string) || 'Admin';
+  const actorId = (req.headers['x-user-id'] as string) || 'usr-admin-1';
+  const actorName = (req.headers['x-user-name'] as string) || 'Carlos Mendoza';
+
+  if (userRole !== 'Super Admin' && userRole !== 'Admin') {
+    return res.status(403).json({ error: 'Access Denied: Administrative authority required.' });
+  }
+
+  const { reason } = req.body;
+  if (!reason || reason.trim().length < 5) {
+    return res.status(400).json({ error: 'A valid reason for suspension is required (minimum 5 characters).' });
+  }
+
+  const franchisee = franchisees.find(f => f.id === id);
+  if (!franchisee) {
+    return res.status(404).json({ error: 'Franchisee not found.' });
+  }
+
+  const prevStatus = franchisee.status || 'Active';
+  franchisee.status = 'Suspended';
+  franchisee.accountStatus = 'Suspended';
+  franchisee.lastActivityAt = new Date().toISOString();
+  franchisee.updatedAt = new Date().toISOString();
+
+  // Block user account login
+  const u = users.find(usr => usr.id === franchisee.userId);
+  if (u) {
+    u.accountStatus = 'Suspended';
+    u.updatedAt = new Date().toISOString();
+  }
+
+  // Status History
+  franchiseeStatusHistory.unshift({
+    id: `fsh-${Date.now()}`,
+    franchiseeId: franchisee.id,
+    changedByUserId: actorId,
+    changedByName: actorName,
+    changedByRole: userRole,
+    actionType: 'SUSPEND',
+    previousStatus: prevStatus,
+    newStatus: 'Suspended',
+    reason: reason.trim(),
+    createdAt: new Date().toISOString(),
+  });
+
+  logAudit(actorId, actorName, userRole as any, 'SUSPEND_FRANCHISEE', 'FRANCHISEES', franchisee.id, `Suspended ${franchisee.franchiseName}. Reason: ${reason}`);
+
+  res.json({ success: true, message: `${franchisee.franchiseName} has been suspended.`, franchisee });
+});
+
+// Terminate Franchisee (Super Admin ONLY!)
+app.post('/api/franchisees/:id/terminate', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userRole = (req.headers['x-user-role'] as string) || 'Admin';
+  const actorId = (req.headers['x-user-id'] as string) || 'usr-admin-1';
+  const actorName = (req.headers['x-user-name'] as string) || 'Carlos Mendoza';
+
+  // Strict Server-Side Role Enforcement: Only Super Admin can terminate
+  if (userRole !== 'Super Admin') {
+    return res.status(403).json({
+      error: 'Permission Denied: Only Super Admin has authorization to terminate a franchisee agreement.',
+      requiredRole: 'Super Admin',
+      currentRole: userRole,
+    });
+  }
+
+  const { reason } = req.body;
+  if (!reason || reason.trim().length < 8) {
+    return res.status(400).json({ error: 'A formal termination justification is required (minimum 8 characters).' });
+  }
+
+  const franchisee = franchisees.find(f => f.id === id);
+  if (!franchisee) {
+    return res.status(404).json({ error: 'Franchisee not found.' });
+  }
+
+  const prevStatus = franchisee.status || 'Active';
+  franchisee.status = 'Terminated';
+  franchisee.accountStatus = 'Suspended';
+  franchisee.softDeletedAt = new Date().toISOString();
+  franchisee.settlementFlag = true;
+  franchisee.lastActivityAt = new Date().toISOString();
+  franchisee.updatedAt = new Date().toISOString();
+
+  // Block user account login
+  const u = users.find(usr => usr.id === franchisee.userId);
+  if (u) {
+    u.accountStatus = 'Suspended';
+    u.updatedAt = new Date().toISOString();
+  }
+
+  // Cancel pending supply orders
+  let cancelledCount = 0;
+  supplyRequests.forEach(sr => {
+    if (sr.franchiseeId === franchisee.id && (sr.status === 'Pending Review' || sr.status === 'Processing')) {
+      sr.status = 'Cancelled';
+      sr.deliveryNotes = `${sr.deliveryNotes || ''} [Cancelled due to franchise termination]`.trim();
+      cancelledCount++;
+    }
+  });
+
+  // Status History
+  franchiseeStatusHistory.unshift({
+    id: `fsh-${Date.now()}`,
+    franchiseeId: franchisee.id,
+    changedByUserId: actorId,
+    changedByName: actorName,
+    changedByRole: 'Super Admin',
+    actionType: 'TERMINATE',
+    previousStatus: prevStatus,
+    newStatus: 'Terminated',
+    reason: reason.trim(),
+    createdAt: new Date().toISOString(),
+  });
+
+  logAudit(actorId, actorName, 'Super Admin', 'TERMINATE_FRANCHISEE', 'FRANCHISEES', franchisee.id, `Terminated ${franchisee.franchiseName} (soft delete). Flagged for inventory settlement. Cancelled ${cancelledCount} orders. Reason: ${reason}`);
+
+  res.json({
+    success: true,
+    message: `${franchisee.franchiseName} terminated (soft-deleted). Pending orders cancelled and balance flagged for final settlement.`,
+    franchisee,
+    cancelledCount,
+  });
+});
+
+// Reinstate Franchisee (Super Admin ONLY!)
+app.post('/api/franchisees/:id/reinstate', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userRole = (req.headers['x-user-role'] as string) || 'Admin';
+  const actorId = (req.headers['x-user-id'] as string) || 'usr-admin-1';
+  const actorName = (req.headers['x-user-name'] as string) || 'Carlos Mendoza';
+
+  // Strict Server-Side Role Enforcement: Only Super Admin can reinstate
+  if (userRole !== 'Super Admin') {
+    return res.status(403).json({
+      error: 'Permission Denied: Only Super Admin has authorization to reinstate a suspended or terminated franchisee.',
+      requiredRole: 'Super Admin',
+      currentRole: userRole,
+    });
+  }
+
+  const { reason } = req.body;
+  if (!reason || reason.trim().length < 5) {
+    return res.status(400).json({ error: 'A justification for reinstatement is required (minimum 5 characters).' });
+  }
+
+  const franchisee = franchisees.find(f => f.id === id);
+  if (!franchisee) {
+    return res.status(404).json({ error: 'Franchisee not found.' });
+  }
+
+  const prevStatus = franchisee.status || 'Suspended';
+  franchisee.status = 'Active';
+  franchisee.accountStatus = 'Active';
+  franchisee.softDeletedAt = undefined;
+  franchisee.settlementFlag = false;
+  franchisee.lastActivityAt = new Date().toISOString();
+  franchisee.updatedAt = new Date().toISOString();
+
+  // Re-enable user account login
+  const u = users.find(usr => usr.id === franchisee.userId);
+  if (u) {
+    u.accountStatus = 'Active';
+    u.updatedAt = new Date().toISOString();
+  }
+
+  // Status History
+  franchiseeStatusHistory.unshift({
+    id: `fsh-${Date.now()}`,
+    franchiseeId: franchisee.id,
+    changedByUserId: actorId,
+    changedByName: actorName,
+    changedByRole: 'Super Admin',
+    actionType: 'REINSTATE',
+    previousStatus: prevStatus,
+    newStatus: 'Active',
+    reason: reason.trim(),
+    createdAt: new Date().toISOString(),
+  });
+
+  logAudit(actorId, actorName, 'Super Admin', 'REINSTATE_FRANCHISEE', 'FRANCHISEES', franchisee.id, `Reinstated ${franchisee.franchiseName} to Active status. Reason: ${reason}`);
+
+  res.json({ success: true, message: `${franchisee.franchiseName} successfully reinstated to Active.`, franchisee });
 });
 
 // Agents API
